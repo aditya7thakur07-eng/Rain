@@ -1,0 +1,208 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Dodge The Blocks</title>
+
+<style>
+
+*{
+margin:0;
+padding:0;
+box-sizing:border-box;
+font-family:Arial, Helvetica, sans-serif;
+}
+
+body{
+background:linear-gradient(135deg,#141e30,#243b55);
+height:100vh;
+display:flex;
+align-items:center;
+justify-content:center;
+color:white;
+}
+
+.game-container{
+width:95%;
+max-width:420px;
+text-align:center;
+}
+
+h1{
+margin-bottom:10px;
+}
+
+canvas{
+background:#0a0a0a;
+border-radius:12px;
+box-shadow:0 10px 25px rgba(0,0,0,0.4);
+width:100%;
+}
+
+.ui{
+display:flex;
+justify-content:space-between;
+margin:10px 0;
+font-size:18px;
+}
+
+button{
+margin-top:10px;
+padding:12px 20px;
+border:none;
+border-radius:8px;
+font-size:16px;
+background:#00e676;
+cursor:pointer;
+}
+
+button:hover{
+opacity:0.9;
+}
+
+.controls{
+display:flex;
+justify-content:space-between;
+margin-top:12px;
+}
+
+.control-btn{
+flex:1;
+margin:5px;
+padding:14px;
+font-size:20px;
+border-radius:10px;
+background:white;
+color:black;
+}
+
+</style>
+</head>
+
+<body>
+
+<div class="game-container">
+
+<h1>🎮 Dodge The Blocks</h1>
+
+<div class="ui">
+<div id="score">Score: 0</div>
+<div id="highscore">High: 0</div>
+</div>
+
+<canvas id="game" width="400" height="500"></canvas>
+
+<button onclick="startGame()">Start / Restart</button>
+
+<div class="controls">
+<button class="control-btn" onclick="moveLeft()">⬅</button>
+<button class="control-btn" onclick="moveRight()">➡</button>
+</div>
+
+</div>
+
+<script>
+
+const canvas = document.getElementById("game")
+const ctx = canvas.getContext("2d")
+
+let player
+let blocks
+let score
+let highScore = 0
+let running = false
+
+function startGame(){
+
+player = {x:180,y:460,w:40,h:20,speed:25}
+blocks = []
+score = 0
+running = true
+
+}
+
+function spawnBlock(){
+
+let size = 30 + Math.random()*30
+
+blocks.push({
+x:Math.random()*(canvas.width-size),
+y:-size,
+w:size,
+h:size,
+speed:3 + Math.random()*2
+})
+
+}
+
+function update(){
+
+if(!running) return
+
+if(Math.random()<0.03) spawnBlock()
+
+ctx.clearRect(0,0,canvas.width,canvas.height)
+
+ctx.fillStyle="white"
+ctx.fillRect(player.x,player.y,player.w,player.h)
+
+for(let i=0;i<blocks.length;i++){
+
+let b = blocks[i]
+
+b.y += b.speed
+
+ctx.fillStyle="red"
+ctx.fillRect(b.x,b.y,b.w,b.h)
+
+if(
+b.x < player.x + player.w &&
+b.x + b.w > player.x &&
+b.y < player.y + player.h &&
+b.y + b.h > player.y
+){
+running=false
+alert("Game Over! Score: "+score)
+if(score>highScore) highScore=score
+}
+
+}
+
+blocks = blocks.filter(b=>b.y<canvas.height+50)
+
+score++
+document.getElementById("score").innerText="Score: "+score
+document.getElementById("highscore").innerText="High: "+highScore
+
+requestAnimationFrame(update)
+
+}
+
+function moveLeft(){
+player.x -= player.speed
+if(player.x<0) player.x=0
+}
+
+function moveRight(){
+player.x += player.speed
+if(player.x+player.w>canvas.width)
+player.x = canvas.width-player.w
+}
+
+document.addEventListener("keydown",e=>{
+if(e.key==="ArrowLeft") moveLeft()
+if(e.key==="ArrowRight") moveRight()
+})
+
+function gameLoop(){
+update()
+requestAnimationFrame(gameLoop)
+}
+
+gameLoop()
+
+</script>
+
+</body>
+</html>
